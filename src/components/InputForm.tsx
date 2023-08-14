@@ -10,11 +10,12 @@ const style1 = {
 
 type InputFormProps = {
     todoText: string;
+    setTodoText: React.Dispatch<React.SetStateAction<string>>
     onChangeTodoText: (event: React.ChangeEvent<HTMLInputElement>) => void;
     onClickAdd: () => void;
 };
 
-const InputForm: React.FC<InputFormProps> = ({ todoText, onChangeTodoText, onClickAdd }) => {
+const InputForm: React.FC<InputFormProps> = ({ todoText, setTodoText, onChangeTodoText, onClickAdd }) => {
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
             event.preventDefault();

@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import { Button } from '@mui/material';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import InputForm from './components/InputForm';
+import { db, addTodoToFirestore } from './components/FireBase';
+import { collection, getDocs } from 'firebase/firestore';
 
 const style4 = {
   paddingTop: '8px',
@@ -24,7 +26,17 @@ const style6 = {
   color: '#fff',
 }
 
+type Todo = {
+  id: number;
+  title: string;
+};
+
+// type AppProps = {
+//   setTodos: React.Dispatch<React.SetStateAction<Todo[]>>;
+// };
+
 const App: React.FC = () => {
+  const [todos, setTodos] = useState<Todo[]>([]);
   // input form 内のtodoテキストのstateとそれを管理する関数を定義したuseStateフック。初期値は空白。
   const [todoText, setTodoText] = useState('');
   // 未完了todoリスト配列のstateとそれを管理する関数を定義したuseStateフック。初期値は空白の配列。
@@ -35,12 +47,34 @@ const App: React.FC = () => {
   const onChangeTodoText = (event: React.ChangeEvent<HTMLInputElement>) => setTodoText(event.target.value);
   // ADD ボタン押下時に実行するonClickメソッド。入力欄が空白ならば実行しない。既存の未完了todoリスト配列に新たなtodoテキストを追加した配列をnewTodosと定義。
   // 未完了todoリストをnewTodosに更新し、todoテキストを空白の初期値に更新する。
-  const onClickAdd = () => {
+  const onClickAdd = async () => {
     if (todoText === '') return;
+    await addTodoToFirestore(todoText);
     const newTodos: any = [...inCompleteTodos, todoText];
     setInCompleteTodos(newTodos);
     setTodoText('');
   }
+
+  useEffect(() => {
+    // Firestoreからデータを取得してtodosステートを更新
+    const fetchData = async () => {
+      try {
+        const todoCollection = collection(db, 'todo');
+        const querySnapshot = await getDocs(todoCollection);
+        const todosData: Todo[] = [];
+        querySnapshot.forEach(doc => {
+          const todoData = doc.data();
+          todosData.push({ id: parseInt(doc.id), title: todoData.title });
+        });
+        setTodos(todosData);
+      } catch (error) {
+        console.error('Error fetching todos:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const onClickComplete = (index: number) => {
     // 新しい未完了todo配列に既存の未完了todo配列を代入する
     const newIncompleteTodos = [...inCompleteTodos];
@@ -80,7 +114,7 @@ const App: React.FC = () => {
     <>
       <div className="App">
         <div style={{ display: 'flex' }}>
-          <InputForm todoText={todoText} onChangeTodoText={onChangeTodoText} onClickAdd={onClickAdd} />
+          <InputForm todoText={todoText} setTodoText={setTodoText} onChangeTodoText={onChangeTodoText} onClickAdd={onClickAdd} />
           <Button onClick={onClickAdd} style={{ marginTop: '24px' }} variant="contained">ADD</Button>
         </div>
       </div>
