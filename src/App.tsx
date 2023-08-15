@@ -31,10 +31,6 @@ type Todo = {
   title: string;
 };
 
-// type AppProps = {
-//   setTodos: React.Dispatch<React.SetStateAction<Todo[]>>;
-// };
-
 const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   // input form 内のtodoテキストのstateとそれを管理する関数を定義したuseStateフック。初期値は空白。
@@ -114,17 +110,24 @@ const App: React.FC = () => {
     <>
       <div className="App">
         <div style={{ display: 'flex' }}>
+          {/* TODOリスト入力フォームをInputFormコンポーネントとして分けて作成。4つのpropsをAppからInputFormに渡す。 */}
           <InputForm todoText={todoText} setTodoText={setTodoText} onChangeTodoText={onChangeTodoText} onClickAdd={onClickAdd} />
+          {/* Material UI のButton要素をADDボタンに使用。クリックされたらonClickAddイベントハンドラを実行。スタイルinJSを使用。 */}
           <Button onClick={onClickAdd} style={{ marginTop: '24px' }} variant="contained">ADD</Button>
         </div>
       </div>
+      {/* 未完了のTODOリスト領域 */}
       <div style={style5}>
         <p style={style4}>TASKS TO DO</p>
+        {/* 以下ListやListItemはMUIを使用。*/}
         <List>
+          {/* 未完了のtodo配列をmap関数で取得。  */}
           {inCompleteTodos.map((todo, index) => {
             return (
+
               <ListItem key={todo}>
                 <ListItemText primary={todo} />
+                {/* DeleteとCompletedのクリックイベントハンドラを設置。 */}
                 <Button onClick={() => onClickComplete(index)} style={{ marginRight: '8px' }} variant="contained">Completed</Button>
                 <Button onClick={() => onClickDelete(index)} variant="contained">Delete</Button>
               </ListItem>
@@ -132,13 +135,17 @@ const App: React.FC = () => {
           })}
         </List>
       </div>
+      {/* 完了済のTODOリスト領域 */}
       <div style={style6}>
         <p style={style4}>COMPLETED TASKS</p>
         <List>
+          {/* 完了済のtodo配列をmap関数で取得。 */}
           {completeTodos.map((todo, index) => {
             return (
+              // todo配列の各要素を特定するためのkeyの設定
               <ListItem key={todo}>
                 <ListItemText primary={todo} />
+                {/* Reverseのクリックイベントハンドラを設置。 */}
                 <Button onClick={() => onClickReverse(index)} variant="contained">Reverse</Button>
               </ListItem>
             )
